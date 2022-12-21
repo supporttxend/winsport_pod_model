@@ -27,10 +27,10 @@ BATCH_SIZE = 2
 
 # print(device_lib.list_local_devices())
 
-gpu = tf.config.experimental.list_physical_devices("GPU")
-tf.config.experimental.set_memory_growth(gpu[0], True)
+# gpu = tf.config.experimental.list_physical_devices("GPU")
+# tf.config.experimental.set_memory_growth(gpu[0], True)
 
-class_subset = sorted(os.listdir(BASE_PATH / RAW_DATA_FOLDER))
+
 
 try:
     resp = downlaod_data_set()
@@ -51,6 +51,8 @@ try:
 
 except Exception as e:
     print(f"Error at downloading and spliting images, {e}")
+
+class_subset = sorted(os.listdir(BASE_PATH / RAW_DATA_FOLDER))
 
 train_generator = ImageDataGenerator(
     rotation_range=90,

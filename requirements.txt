@@ -9,4 +9,4 @@ schema
 awscli
 cloudpathlib[s3,gs,azure]
 split-folders
-shutil
+cloudpathlib
