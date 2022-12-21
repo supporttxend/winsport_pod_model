@@ -1,7 +1,7 @@
 from re import T
 from fastapi import FastAPI
 import uvicorn
-import model_prdiction
+import api_pod
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -9,7 +9,7 @@ app = FastAPI()
 app.mount("/data", StaticFiles(directory="data"), name="data")
 
 app.include_router(
-    model_prdiction.router, prefix="/model_prediction", tags=["model_prediction"]
+    api_pod.router, prefix="", tags=["model_prediction"]
 )
 
 app.add_middleware(
