@@ -10,3 +10,4 @@ awscli
 cloudpathlib[s3,gs,azure]
 split-folders
 cloudpathlib
+scipy
