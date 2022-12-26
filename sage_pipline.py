@@ -7,9 +7,6 @@ from sagemaker.estimator import Estimator
 
 
 
-
-
-
 RAW_DATA_FOLDER = settings.RAW_DATA_FOLDER
 DATA_SET_FOLDER = settings.DATA_SET_FOLDER
 S3_SIG_FOLDER = settings.S3_SIG_FOLDER
