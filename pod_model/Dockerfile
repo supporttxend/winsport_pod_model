@@ -15,14 +15,19 @@ RUN wget \
 RUN conda init bash && \
     . /root/.bashrc && \
     conda update conda && \
-    conda activate base
+    conda activate base && \
+    conda install pip
 
 ENV PIP_DISABLE_PIP_VERSION_CHECK 1
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONUNBUFFERED=TRUE
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=TRUE
+ENV PATH="/opt/pod_model:${PATH}"
 
-WORKDIR code/
+WORKDIR /opt/ml/pod_model
+COPY . .
 
 COPY requirements.txt .
 
 RUN pip install -r requirements.txt
+

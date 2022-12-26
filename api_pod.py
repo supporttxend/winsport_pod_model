@@ -9,7 +9,7 @@ import uvicorn
 import shutil
 from PIL import Image
 import boto3
-from quries import upload_file_to_bucket, s3_auth, upload_file_to_bucket
+from pod_model.quries import upload_file_to_bucket, s3_auth, upload_file_to_bucket
 from botocore.client import BaseClient
 from fastapi.responses import JSONResponse
 

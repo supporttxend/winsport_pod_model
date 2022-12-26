@@ -1,0 +1,26 @@
+version: "3.0"
+
+
+services:
+  api:
+    build: .
+    container_name: api
+    restart: unless-stopped
+    tty: true
+    stdin_open: true
+    volumes:
+    - /tmp/tmpjmh8dl1t/algo-1-djrrc/input:/opt/ml/input
+    - /tmp/tmpjmh8dl1t/algo-1-djrrc/output/data:/opt/ml/output/data
+    - /tmp/tmpjmh8dl1t/algo-1-djrrc/output:/opt/ml/output
+    - /tmp/tmpjmh8dl1t/model:/opt/ml/model
+    - /home/ubuntu/winsport_pod_model/pod_model:/opt/ml/pod_model
+    - /home/ubuntu/winsport_pod_model/pod_model/data_set/train:/opt/ml/input/data/train
+    - /home/ubuntu/winsport_pod_model/pod_model/data_set/test:/opt/ml/input/data/validation
+    command: nvidia-smi -l
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

@@ -1,24 +1,52 @@
+from pod_model import settings
 import boto3
-import sagemaker, boto3, json
-from sagemaker import get_execution_role
-from config import settings
-from quries import downlaod_data_set
-from sagemaker.workflow.pipeline import Pipeline
-from sagemaker.tensorflow import TensorFlowProcessor
-
-
+import sagemaker
+from sagemaker.s3 import S3Uploader
 from sagemaker.tensorflow import TensorFlow
+from sagemaker.estimator import Estimator
 
-tf_estimator = TensorFlow(
-    entry_point="training.py",
-    role=get_execution_role(),
-    instance_count=1,
-    instance_type="local",
-    framework_version="2.10",
-    py_version="py39",
-    script_mode=True,
-)
-inputs = {"training": f"file://data_set"}
 
-tf_estimator.fit(inputs)
 
+
+
+
+RAW_DATA_FOLDER = settings.RAW_DATA_FOLDER
+DATA_SET_FOLDER = settings.DATA_SET_FOLDER
+S3_SIG_FOLDER = settings.S3_SIG_FOLDER
+S3_SIG_BUCKET = settings.S3_SIG_BUCKET
+
+
+#Uploading data to S3 bucket titled "tf-iris-data"
+
+DESTINATION_FOLDER = f"s3://{S3_SIG_BUCKET}/data-set/"
+
+
+prefix = "pod-data"
+sagemaker_session = sagemaker.Session()
+role = sagemaker.get_execution_role()
+
+# tf_estimator = Estimator(image_uri="401823493276.dkr.ecr.us-east-1.amazonaws.com/pod:latest",
+#                          entry_point='train.py',
+#                           role=role,
+#                           instance_type='local',
+#                           source_dir="pod_model",
+#                          )
+
+#Training
+
+
+# training_input_path = sagemaker_session.upload_data(path="pod_model/data_set")
+# print(training_input_path)
+# tf_estimator.fit()
+
+from sagemaker.estimator import Estimator
+
+estimator = Estimator(image_uri="401823493276.dkr.ecr.us-east-1.amazonaws.com/pod:latest",
+                      role=role,
+                      instance_count=2,
+                      instance_type="ml.m5.xlarge",
+                      entry_point='train.py',
+                      source_dir="pod_model"
+                      )
+
+estimator.fit()

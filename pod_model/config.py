@@ -1,13 +1,10 @@
 from pathlib import Path
 import os
-from decouple import config
-
-
-from decouple import Config, RepositoryEnv
+from decouple import AutoConfig
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# config = Config(RepositoryEnv(".env"))
+config = AutoConfig(search_path='pod_model/settings.ini')
 
 
 TEMP_ENV = config("ENVIORNMENT")

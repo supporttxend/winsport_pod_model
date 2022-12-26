@@ -10,14 +10,12 @@ from config import settings
 
 import boto3
 from botocore.client import BaseClient
-
-from config import settings
 from cloudpathlib import CloudPath
 from pathlib import Path
 
 
-folder = settings.S3_SIG_FOLDER
-bucket = settings.S3_SIG_BUCKET
+S3_SIG_FOLDER = settings.S3_SIG_FOLDER
+S3_SIG_BUCKET = settings.S3_SIG_BUCKET
 
 RAW_DATA_FOLDER = settings.RAW_DATA_FOLDER
 
@@ -68,7 +66,7 @@ async def upload_file_to_bucket(s3_client, user_id: str, file_obj, object_name=N
 def downlaod_data_set():
 
     try:
-        path = CloudPath(f"s3://{bucket}/{folder}")
+        path = CloudPath(f"s3://{S3_SIG_BUCKET}/{S3_SIG_FOLDER}")
         dir_path = Path(RAW_DATA_FOLDER)
         dir_path.mkdir(parents=True, exist_ok=True)
         path.download_to(dir_path)
