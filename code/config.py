@@ -2,14 +2,21 @@ from pathlib import Path
 import os
 from decouple import AutoConfig
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+try:
+    BASE_DIR = Path(__file__).resolve().parent
 
-config = AutoConfig(search_path='pod_model/settings.ini')
+except Exception as e:
+
+    BASE_DIR = Path(".").parent.absolute()
+
+print(BASE_DIR / "settings.ini")
+
+config = AutoConfig(search_path=BASE_DIR / "settings.ini")
 
 
 TEMP_ENV = config("ENVIORNMENT")
 
-print("UMER ----------->", config("ENVIORNMENT"))
+print("ENVIORNMENT ----------->", config("ENVIORNMENT"))
 
 
 class BaseConfig:
@@ -26,12 +33,24 @@ class DevConfig(BaseConfig):
     S3_SIG_BUCKET = config("S3_SIG_BUCKET")
     S3_SIG_FOLDER = config("S3_SIG_FOLDER")
     RAW_DATA_FOLDER = config("RAW_DATA_FOLDER")
-    DATA_SET_FOLDER = config("DATA_SET_FOLDER")
+    DATA_SET_FOLDER = BASE_DIR.parent / "input" / config("DATA_SET_FOLDER")
+    SM_OUTPUT_DATA_DIR = BASE_DIR.parent / "model"
+    SM_CHECK_POINT_DIR = BASE_DIR.parent / "checkpoints"
 
 
 class TestConfig(BaseConfig):
     ENV = "testing"
     DEBUG = True
+    S3_ACCESS_KEY_ID = config("S3_ACCESS_KEY_ID")
+    S3_SECRET_ACCESS_KEY = config("S3_SECRET_ACCESS_KEY")
+    S3_SIG_BUCKET = config("S3_SIG_BUCKET")
+    S3_SIG_FOLDER = config("S3_SIG_FOLDER")
+    RAW_DATA_FOLDER = config("RAW_DATA_FOLDER")
+    DATA_SET_FOLDER = config("DATA_SET_FOLDER")
+    PRE_PROCESSING_IN = BASE_DIR.parent / "data"
+    PRE_PROCESSING_OUT = BASE_DIR.parent.parent / "output"
+    SM_OUTPUT_DATA_DIR = BASE_DIR.parent / "model"
+    SM_CHECK_POINT_DIR = BASE_DIR.parent / "checkpoints"
 
 
 class ProdConfig(BaseConfig):

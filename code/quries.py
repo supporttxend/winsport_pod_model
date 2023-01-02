@@ -75,4 +75,3 @@ def downlaod_data_set():
     except Exception as e:
         print(f"Error in read_images_s3, {e}")
         return False
-

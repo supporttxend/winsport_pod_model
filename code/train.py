@@ -19,30 +19,44 @@ import shutil
 import datetime
 import time
 import pickle
+import argparse
 
+
+try:
+    BASE_DIR = Path(__file__).resolve().parent
+
+except Exception as e:
+
+    BASE_DIR = Path(".").parent.absolute()
 
 RAW_DATA_FOLDER = settings.RAW_DATA_FOLDER
 DATA_SET_FOLDER = settings.DATA_SET_FOLDER
-BASE_PATH = Path("")
+SM_OUTPUT_DATA_DIR = settings.SM_OUTPUT_DATA_DIR
+SM_CHECK_POINT_DIR = settings.SM_CHECK_POINT_DIR
+
 BATCH_SIZE = 2
+
+
+print("Script is running")
 
 # print(device_lib.list_local_devices())
 
-try:
-    gpu = tf.config.experimental.list_physical_devices("GPU")
-    tf.config.experimental.set_memory_growth(gpu[0], True)
-except:
-    from tensorflow.compat.v1 import ConfigProto
-    from tensorflow.compat.v1 import InteractiveSession
+# try:
+#     gpu = tf.config.experimental.list_physical_devices("GPU")
+#     tf.config.experimental.set_memory_growth(gpu[0], True)
+# except:
+#     from tensorflow.compat.v1 import ConfigProto
+#     from tensorflow.compat.v1 import InteractiveSession
 
 
-    def fix_gpu():
-        config = ConfigProto()
-        config.gpu_options.allow_growth = True
-        session = InteractiveSession(config=config)
+#     def fix_gpu():
+#         config = ConfigProto()
+#         config.gpu_options.allow_growth = True
+#         session = InteractiveSession(config=config)
 
 
-    fix_gpu()
+#     fix_gpu()
+
 
 def main():
 
@@ -66,8 +80,10 @@ def main():
     # except Exception as e:
     #     print(f"Error at downloading and spliting images, {e}")
 
-
-    class_subset = sorted(os.listdir(BASE_PATH / DATA_SET_FOLDER / "train"))
+    # prefix = '/opt/ml/'
+    input_path = BASE_DIR.parent / "input/data"
+    # class_subset = sorted(os.listdir(BASE_PATH / DATA_SET_FOLDER / "train"))
+    class_subset = sorted(os.listdir(os.path.join(input_path, "train")))
 
     train_generator = ImageDataGenerator(
         rotation_range=90,
@@ -82,11 +98,11 @@ def main():
 
     test_generator = ImageDataGenerator(preprocessing_function=preprocess_input)
 
-    download_dir = BASE_PATH / DATA_SET_FOLDER
+    # download_dir = BASE_PATH / DATA_SET_FOLDER
+    download_dir = input_path
     traingen, validgen, testgen = cf.image_generator(
         download_dir, train_generator, test_generator, class_subset, BATCH_SIZE
     )
-
 
     input_shape = (224, 224, 3)
     optim_1 = Adam(learning_rate=0.001)
@@ -94,27 +110,25 @@ def main():
 
     n_steps = traingen.samples // BATCH_SIZE
     n_val_steps = validgen.samples // BATCH_SIZE
-    n_epochs = 2000
+    n_epochs = 5
 
     # First we'll train the model without Fine-tuning
     vgg_model = create_model(input_shape, n_classes, optim_1, fine_tune=2)
     vgg_model
 
-
     # plot_loss_1 = PlotLossesCallback()
     # print("plotloss :",plot_loss_1)
     # ModelCheckpoint callback - save best weights
     tl_checkpoint_1 = ModelCheckpoint(
-        filepath="tl_model_v1.weights.best.hdf6",
+        filepath=SM_CHECK_POINT_DIR
+        / f"tl_model_v1_{int(time.time())}.weights.best.hdf6",
         save_best_only=True,
         monitor="accuracy",
         verbose=1,
     )
     print("checkpoint", tl_checkpoint_1)
 
-    Model_NAME = (
-        f"signature-model-{int(time.time())}"
-    )
+    Model_NAME = f"signature-model-{int(time.time())}"
     log_dir = f"logs/{Model_NAME}"
     tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir)
 
@@ -131,9 +145,12 @@ def main():
     for key in vgg_history.history:
         print("For cehcking :", key)
 
-    # with open(os.path.join(model_path, 'pod-model.pkl'), 'wb') as out:
-    #     pickle.dump(vgg_model, out)
-    # print('Training complete.')
+    with open(
+        os.path.join(SM_OUTPUT_DATA_DIR, f"pod-model-{int(time.time())}.pkl"), "wb"
+    ) as out:
+        pickle.dump(vgg_model, out)
+
+    print("Training complete.")
 
 
 if __name__ == "__main__":

@@ -1,14 +1,19 @@
 from keras.preprocessing.image import ImageDataGenerator
 from keras.applications.vgg16 import preprocess_input
+import os
 
 
 def image_generator(
     download_dir, train_generator, test_generator, class_subset, BATCH_SIZE
 ):
 
-    train_data_dir = download_dir / "train"
-    # val_data_dir = download_dir / "/val"
-    test_data_dir = download_dir / "test"
+    # train_data_dir = download_dir / "train"
+    # # val_data_dir = download_dir / "/val"
+    # test_data_dir = download_dir / "test"
+
+    train_data_dir = os.path.join(download_dir, "train")
+    # val_data_dir = os.path.join(download_dir, "/val)"
+    test_data_dir = os.path.join(download_dir, "test")
 
     traingen = train_generator.flow_from_directory(
         train_data_dir,
@@ -43,4 +48,3 @@ def image_generator(
     )
 
     return traingen, validgen, testgen
-

@@ -1,0 +1,27 @@
+FROM 401823493276.dkr.ecr.us-west-1.amazonaws.com/main:latest
+
+# USER root
+ENV PATH="/opt/ml/processing/output:/opt/ml/processing/input/data:/opt/ml/processing/input/code:${PATH}"
+
+# Set up the code in the image
+
+# RUN chown -R root:root /opt/ml/processing/input/entrypoint/
+# RUN chown -R root:root /opt/ml/processing/input/code/
+# RUN chown -R root:root .
+
+
+# RUN chmod 777 -R .
+
+# RUN mkdir -p /opt/ml/processing/input/data
+# RUN mkdir -p /opt/ml/processing/output
+
+WORKDIR /opt/ml/processing/input/code
+
+COPY /code .
+
+
+RUN pip --no-cache-dir install -r requirements.txt
+
+# ENTRYPOINT [ "./run.sh" ]
+
+# CMD ["train"]

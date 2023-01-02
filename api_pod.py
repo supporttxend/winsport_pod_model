@@ -1,7 +1,16 @@
-from fastapi import APIRouter, UploadFile, File, Request, HTTPException, BackgroundTasks, status
+from fastapi import (
+    APIRouter,
+    UploadFile,
+    File,
+    Request,
+    HTTPException,
+    BackgroundTasks,
+    status,
+)
 from fastapi import APIRouter, Depends, HTTPException, status
 
 import uvicorn
+
 # from tensorflow.keras.preprocessing import image
 # import numpy as np
 # from keras.applications.vgg16 import VGG16, preprocess_input
@@ -91,7 +100,9 @@ def get_class(feature, id):
 
 
 @router.post("/upload-signatures")
-async def upload_sinature_files(user_id:str, signature: UploadFile = File(...), s3: BaseClient = Depends(s3_auth)):
+async def upload_sinature_files(
+    user_id: str, signature: UploadFile = File(...), s3: BaseClient = Depends(s3_auth)
+):
     """This endpoint accepts a CSV file with a specific schema then uploads it to S3,
         converts it into a list of dictionaries and returns the list.
 
@@ -110,12 +121,19 @@ async def upload_sinature_files(user_id:str, signature: UploadFile = File(...), 
             detail="Signature file type is invalid.",
         )
 
-    upload_obj = await upload_file_to_bucket(s3_client=s3, user_id=user_id, file_obj=signature.file,
-                                       object_name=signature.filename
-                                       )
+    upload_obj = await upload_file_to_bucket(
+        s3_client=s3,
+        user_id=user_id,
+        file_obj=signature.file,
+        object_name=signature.filename,
+    )
     if upload_obj:
-        return JSONResponse(content="Object has been uploaded to bucket successfully",
-                            status_code=status.HTTP_201_CREATED)
+        return JSONResponse(
+            content="Object has been uploaded to bucket successfully",
+            status_code=status.HTTP_201_CREATED,
+        )
     else:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                            detail="File could not be uploaded")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="File could not be uploaded",
+        )

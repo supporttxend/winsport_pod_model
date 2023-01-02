@@ -8,9 +8,7 @@ from fastapi.staticfiles import StaticFiles
 app = FastAPI()
 app.mount("/data", StaticFiles(directory="data"), name="data")
 
-app.include_router(
-    api_pod.router, prefix="", tags=["model_prediction"]
-)
+app.include_router(api_pod.router, prefix="", tags=["model_prediction"])
 
 app.add_middleware(
     CORSMiddleware,
