@@ -50,11 +50,21 @@ BUCKET_NAME = sagemaker_session.default_bucket()
 
 role = sagemaker.get_execution_role()
 
+if config("ENVIORNMENT") == 'testing':
+    image_uri = "401823493276.dkr.ecr.us-west-1.amazonaws.com/process:latest"
+    instance_type = "local"
+    pipe_line_session = LocalPipelineSession()
+
+elif config("ENVIORNMENT") == "production":
+    image_uri = "401823493276.dkr.ecr.us-west-1.amazonaws.com/process:latest"
+    instance_type = "ml.t3.xlarge"
+    pipe_line_session = PipelineSession()
+
 
 tf_processor = TensorFlowProcessor(
-    image_uri="401823493276.dkr.ecr.us-west-1.amazonaws.com/process:latest",
+    image_uri=image_uri,
     role=role,
-    instance_type="local", #"ml.t3.xlarge",
+    instance_type=instance_type, #"ml.t3.xlarge",
     instance_count=1,
     base_job_name="DataSetSpliting",
     framework_version="2.10",

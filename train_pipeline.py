@@ -46,6 +46,17 @@ BUCKET_NAME = pipe_line_session.default_bucket()
 role = sagemaker.get_execution_role()
 
 
+if config("ENVIORNMENT") == 'testing':
+    image_uri = "train:latest"
+    instance_type = "local"
+    pipe_line_session = pipe_line_session
+
+elif config("ENVIORNMENT") == "production":
+    image_uri = "401823493276.dkr.ecr.us-west-1.amazonaws.com/train:latest"
+    instance_type = "ml.m5.4xlarge"
+    pipe_line_session = pipe_line_session
+
+
 model_path = f"s3://{BUCKET_NAME}/models"
 
 # estimator = Estimator(image_uri="train:latest",
@@ -58,10 +69,10 @@ model_path = f"s3://{BUCKET_NAME}/models"
 #                       )
 
 tf_estimator = TensorFlow(
-    image_uri="401823493276.dkr.ecr.us-west-1.amazonaws.com/train:latest", #"train:latest",
+    image_uri=image_uri, #"train:latest",
     role=role,
     instance_count=1,
-    instance_type="local", #"ml.m5.4xlarge",
+    instance_type=instance_type, #"ml.m5.4xlarge",
     source_dir="code",
     entry_point="train.py",
     model_dir=model_path,
