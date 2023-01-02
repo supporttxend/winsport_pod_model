@@ -50,4 +50,4 @@ docker build -f Dockerfile.train . -t ${image}
 
 docker tag ${image} ${fullname}
 
-# docker push ${fullname}
+docker push ${fullname}

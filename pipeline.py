@@ -52,16 +52,16 @@ inputs = [
     )
 ]
 
-outputs = [
-        ProcessingOutput(
-            output_name="pod-data",
-            source=f"/opt/ml/processing/output",
-            destination=f"s3://{S3_SIG_BUCKET}/pod-data",
-            # s3_upload_mode="EndOfJob",
-        )
-]
+# outputs = [
+#         ProcessingOutput(
+#             output_name="pod-data",
+#             source=f"/opt/ml/processing/output",
+#             destination=f"s3://{S3_SIG_BUCKET}/pod-data",
+#             # s3_upload_mode="EndOfJob",
+#         )
+# ]
 
-# output = f's3://{S3_SIG_BUCKET}/data/'
+output = f's3://{S3_SIG_BUCKET}/data/'
 
 
 # processor = tf_processor.run(inputs=inputs,code='preprocessing.py',source_dir='code')
@@ -70,7 +70,6 @@ step_process = ProcessingStep(
     name="data-spliting",
     step_args=tf_processor.run(
         inputs=inputs,
-        outputs=outputs,
         code="preprocessing.py",
         source_dir="code",
         wait=True,
@@ -80,8 +79,8 @@ step_process = ProcessingStep(
 
 estimator = tf_estimator.fit(
     inputs={
-        "train": f"s3://{S3_SIG_BUCKET}/pod-data/train",
-        "test": f"s3://{S3_SIG_BUCKET}/pod-data/test",
+        "train": f"s3://{S3_SIG_BUCKET}/data/train",
+        "test": f"s3://{S3_SIG_BUCKET}/data/test",
     },
     wait=True,
     logs="All",
@@ -97,7 +96,7 @@ step_train.add_depends_on([step_process])
 
 pipeline = Pipeline(
     name=f"pod-pipeline-dev-{int(time.time())}",
-    steps=[step_process],
+    steps=[step_process, step_train],
     sagemaker_session=pipe_line_session,
 )
 

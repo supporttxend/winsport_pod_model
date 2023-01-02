@@ -63,15 +63,15 @@ PRE_PROCESSING_OUT = settings.PRE_PROCESSING_OUT
 
 def split_dateset_docker(ratio):
     try:
-        # path = CloudPath(f's3://{S3_SIG_BUCKET}/data/')
-        # path.rmtree()
-        # path.mkdir(exist_ok=True)
-        # print("Successfully created directories")
+        path = CloudPath(f's3://{S3_SIG_BUCKET}/data/')
+        path.rmtree()
+        path.mkdir(exist_ok=True)
+        print("Successfully created directories")
 
-        # print(PRE_PROCESSING_IN, PRE_PROCESSING_OUT)
+        print(PRE_PROCESSING_IN, PRE_PROCESSING_OUT)
 
-        # PRE_PROCESSING_IN.mkdir(parents=True, exist_ok=True)
-        # PRE_PROCESSING_OUT.mkdir(parents=True, exist_ok=True)
+        PRE_PROCESSING_IN.mkdir(parents=True, exist_ok=True)
+        PRE_PROCESSING_OUT.mkdir(parents=True, exist_ok=True)
 
         splitfolders.ratio(
             PRE_PROCESSING_IN,
@@ -82,8 +82,8 @@ def split_dateset_docker(ratio):
             move=False,
         )
 
-        # path.upload_from(str(PRE_PROCESSING_OUT), force_overwrite_to_cloud=True)
-        # print("Successfully uploaded directories")
+        path.upload_from(str(PRE_PROCESSING_OUT), force_overwrite_to_cloud=True)
+        print("Successfully uploaded directories")
         return True
     except Exception as e:
         print(f"Error in the split_dateset, {e}")
