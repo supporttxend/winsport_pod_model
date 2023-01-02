@@ -52,9 +52,9 @@ role = sagemaker.get_execution_role()
 
 
 tf_processor = TensorFlowProcessor(
-    image_uri="process:latest",  # "401823493276.dkr.ecr.us-west-1.amazonaws.com/process:latest",
+    image_uri="401823493276.dkr.ecr.us-west-1.amazonaws.com/process:latest",
     role=role,
-    instance_type="local",
+    instance_type="local", #"ml.t3.xlarge",
     instance_count=1,
     base_job_name="DataSetSpliting",
     framework_version="2.10",

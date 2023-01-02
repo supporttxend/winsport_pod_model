@@ -58,10 +58,10 @@ model_path = f"s3://{BUCKET_NAME}/models"
 #                       )
 
 tf_estimator = TensorFlow(
-    image_uri="train:latest",
+    image_uri="401823493276.dkr.ecr.us-west-1.amazonaws.com/train:latest", #"train:latest",
     role=role,
     instance_count=1,
-    instance_type="local",
+    instance_type="local", #"ml.m5.4xlarge",
     source_dir="code",
     entry_point="train.py",
     model_dir=model_path,

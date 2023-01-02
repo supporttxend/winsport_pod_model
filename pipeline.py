@@ -14,6 +14,7 @@ from sagemaker.workflow.pipeline_context import LocalPipelineSession
 
 from processing_pipeline import tf_processor, pipe_line_session
 from train_pipeline import tf_estimator
+import time
 
 try:
     BASE_DIR = Path(__file__).resolve().parent
@@ -45,7 +46,7 @@ role = sagemaker.get_execution_role()
 
 inputs = [
     ProcessingInput(
-        input_name="data",
+        input_name=f"{S3_SIG_FOLDER}",
         source=f"s3://{S3_SIG_BUCKET}/{S3_SIG_FOLDER}/",
         destination=f"/opt/ml/processing/input/data",
     )
@@ -53,9 +54,9 @@ inputs = [
 
 outputs = [
         ProcessingOutput(
-            output_name="data",
+            output_name="pod-data",
             source=f"/opt/ml/processing/output",
-            destination=f"s3://{S3_SIG_BUCKET}/data",
+            destination=f"s3://{S3_SIG_BUCKET}/pod-data",
             # s3_upload_mode="EndOfJob",
         )
 ]
@@ -79,8 +80,8 @@ step_process = ProcessingStep(
 
 estimator = tf_estimator.fit(
     inputs={
-        "train": f"s3://{S3_SIG_BUCKET}/data/train",
-        "test": f"s3://{S3_SIG_BUCKET}/data/test",
+        "train": f"s3://{S3_SIG_BUCKET}/pod-data/train",
+        "test": f"s3://{S3_SIG_BUCKET}/pod-data/test",
     },
     wait=True,
     logs="All",
@@ -88,19 +89,20 @@ estimator = tf_estimator.fit(
 )
 
 step_train = TrainingStep(
-    name="TrainPodModel",
+    name="pod-train-model",
     step_args=estimator,
 )
 
+step_train.add_depends_on([step_process])
 
 pipeline = Pipeline(
-    name="POD pipeline",
+    name=f"pod-pipeline-dev-{int(time.time())}",
     steps=[step_process],
     sagemaker_session=pipe_line_session,
 )
 
 pipeline.create(
-    role_arn=sagemaker.get_execution_role(), description="local pipeline example"
+    role_arn=sagemaker.get_execution_role(), description="dev pipeline example"
 )
 
 # // pipeline will execute locally
