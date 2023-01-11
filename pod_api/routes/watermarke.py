@@ -13,22 +13,19 @@ from fastapi import (
 from sqlalchemy.orm import Session
 # from session import get_db
 import json
-import numpy as np
-import requests
 from pydantic import BaseModel, Field
 from typing import Union
 from PIL import Image, ImageDraw, ImageFont
 from pathlib import Path
-import io
 import PyPDF2
 from fpdf import FPDF
 from typing import List, Union
 from quries import get_pod_files_by_id, update_pod_watermark_url
-import boto3
 import io
 from urllib.parse import urlparse
-from cloudpathlib import CloudPath
 from routes.utils import exception_callback
+from config import settings
+from routes.quries_s3 import upload_image_to_s3, del_s3_object, get_s3_object, get_s3_object_url
 
 
 try:
@@ -40,64 +37,20 @@ except Exception as e:
 
 print("water marke", BASE_DIR / "settings.ini")
 
+
+
+
 router = APIRouter()
 
 def resolve_s3_path(url):
     path = urlparse(url)
     s3_key = path.path.lstrip("/")
-    s3_uri = f"s3://winsport-node/{s3_key}"
+    s3_uri = f"s3://{S3_BUCKET_NODE}/{s3_key}"
     file_path  = Path(path.path)
     extention = file_path.suffix.lower()
     file_name = file_path.name
     return url, s3_key, s3_uri, extention, file_name
 
-
-def connect_bucket():
-    s3 = boto3.resource('s3', region_name='us-east-1')
-    bucket = s3.Bucket('winsport-node')
-    return bucket
-
-
-def get_s3_object(s3_key):
-    bucket = connect_bucket()
-    response = bucket.Object(s3_key).get()
-    if response['ResponseMetadata']['HTTPStatusCode'] == 200:
-        print("object retrival faild")
-        data = response['Body']
-
-        return data
-    else:
-        print("Error: get_s3_object object is not retrived for {s3_key}")
-        return
-
-def del_s3_object(s3_key):
-    bucket = connect_bucket()
-    response = bucket.Object(s3_key).delete()
-    if response['ResponseMetadata']['HTTPStatusCode'] == 204:
-        print("object deleted scussfully")
-        return
-    else:
-        print("Error: del_s3_object object is not deleted for {s3_key}")
-        return
-
-
-def get_s3_object_url(s3_key):
-    client = boto3.client('s3')
-    response = client.generate_presigned_url('get_object', Params={'Bucket': "winsport-node",'Key': s3_key})
-    pasred = urlparse(response)
-    public_url = f"{pasred.scheme}/{pasred.hostname}{pasred.path}"
-
-    return public_url
-
-def upload_image_to_s3(image, s3_key):
-    io_obj = io.BytesIO()
-    image.save(io_obj, format="JPEG")
-    io_obj.seek(0)
-
-    bucket = connect_bucket()
-    bucket.upload_fileobj(io_obj, s3_key)
-
-    return
 
 
 def new_page(text):
@@ -111,8 +64,8 @@ def new_page(text):
             pdf.circle(x=pdf.w-r/2, y=pdf.h-r/2, r=r)
     return pdf.output("watermark.pdf")
 
-def apply_watermark_pdf(input_pdf_path, water_mark_text):
-    new_page(water_mark_text)
+def apply_watermark_pdf(input_pdf_path, text):
+    new_page(text)
     merged_file = "merged.pdf"
 
     input_file = open(input_pdf_path,'rb')
@@ -152,11 +105,9 @@ def apply_watermark_image(s3_key,file_name, s3_uri, text):
         upload_image_to_s3(im, s3_new_key)
         url = get_s3_object_url(s3_new_key)
         # im.save(BASE_DIR.parent.parent / f"data/watermark_{file_name}")
-        # del_s3_object(s3_uri)
+        del_s3_object(s3_uri)
 
         return url
-
-    return
 
 def apply_watermark(pod_id):
     file_list = get_pod_files_by_id(pod_id)
@@ -187,10 +138,11 @@ def file_type(extention):
         ".pdf": "pdf",
     }
     if extention not in file_types:
-        exception_callback(status.HTTP_400_BAD_REQUEST,
-                           "File Type Missmatched",
-                           {"data": f"{extention}", "message": "File Type Missmatched" }
-                           )
+        exception_callback(
+            status.HTTP_400_BAD_REQUEST,
+            "File Type Missmatched",
+            {"data": f"{extention}", "message": "File Type Missmatched"}
+            )
 
     else:
         if file_types[extention] == "image":
@@ -198,6 +150,9 @@ def file_type(extention):
 
         if file_types[extention] == "pdf":
             return "pdf"
+
+
+
 
 @router.get("/")
 def water_marking(pod_id, bg_task: BackgroundTasks):

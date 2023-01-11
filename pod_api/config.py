@@ -31,22 +31,10 @@ class BaseConfig:
 class DevConfig(BaseConfig):
     ENV = "development"
     DEBUG = True
-    # DB_DRIVER = config("DB_DRIVER")
-    # DB_USER = config("DB_USER")
-    # DB_PASSWORD = config("DB_PASSWORD")
-    # DB_HOST = config("DB_HOST")
-    # DB_PORT = config("DB_PORT", cast=int)
-    # DATABASE_NAME = config("DATABASE_NAME")
     API_PORT_DOCKER = config("API_PORT_DOCKER", cast=int)
-    # ACCESS_TOKEN_EXPIRE_MINUTES = config("ACCESS_TOKEN_EXPIRE_MINUTES", cast=int)
-    # SECRET_KEY = config("SECRET_KEY")
     MONGO_DB_URI = config("MONGO_DB_URI", cast=str)
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = json.loads(config("BACKEND_CORS_ORIGINS"))
-    # DEFAULT_SENDER_EMAIL = config("DEFAULT_SENDER_EMAIL")
-    # S3_ACCESS_KEY_ID = config("S3_ACCESS_KEY_ID")
-    # S3_SECRET_ACCESS_KEY = config("S3_SECRET_ACCESS_KEY")
-    # S3_CSV_BUCKET = config("S3_CSV_BUCKET")
-    # S3_CSV_FOLDER = config("S3_CSV_FOLDER")
+    S3_BUCKET_NODE=config("S3_BUCKET_NODE")
 
 
 class TestConfig(BaseConfig):
@@ -57,22 +45,10 @@ class TestConfig(BaseConfig):
 class ProdConfig(BaseConfig):
     ENV = "production"
     DEBUG = False
-    # DB_DRIVER = config("DB_DRIVER")
-    # DB_USER = config("DB_USER")
-    # DB_PASSWORD = config("DB_PASSWORD")
-    # DB_HOST = config("DB_HOST")
-    # DB_PORT = config("DB_PORT", cast=int)
-    # DATABASE_NAME = config("DATABASE_NAME")
     API_PORT_DOCKER = config("API_PORT_DOCKER", cast=int)
     MONGO_DB_URI = config("MONGO_DB_URI", cast=str)
-    # ACCESS_TOKEN_EXPIRE_MINUTES = config("ACCESS_TOKEN_EXPIRE_MINUTES", cast=int)
-    # SECRET_KEY = config("SECRET_KEY")
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = json.loads(config("BACKEND_CORS_ORIGINS"))
-    # DEFAULT_SENDER_EMAIL = config("DEFAULT_SENDER_EMAIL")
-    # S3_ACCESS_KEY_ID = config("S3_ACCESS_KEY_ID")
-    # S3_SECRET_ACCESS_KEY = config("S3_SECRET_ACCESS_KEY")
-    # S3_CSV_BUCKET = config("S3_CSV_BUCKET")
-    # S3_CSV_FOLDER = config("S3_CSV_FOLDER")
+    S3_BUCKET_NODE=config("S3_BUCKET_NODE")
 
 
 def get_settings():
