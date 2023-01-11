@@ -1,6 +1,8 @@
 from pathlib import Path
 import os
 from decouple import AutoConfig
+# import os, sys
+# sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 
 try:
     BASE_DIR = Path(__file__).resolve().parent
@@ -28,19 +30,24 @@ class BaseConfig:
 class DevConfig(BaseConfig):
     ENV = "development"
     DEBUG = True
+    DOCKER = config("DOCKER", cast=bool)
     S3_ACCESS_KEY_ID = config("S3_ACCESS_KEY_ID")
     S3_SECRET_ACCESS_KEY = config("S3_SECRET_ACCESS_KEY")
     S3_SIG_BUCKET = config("S3_SIG_BUCKET")
     S3_SIG_FOLDER = config("S3_SIG_FOLDER")
     RAW_DATA_FOLDER = config("RAW_DATA_FOLDER")
     DATA_SET_FOLDER = BASE_DIR.parent / "input" / config("DATA_SET_FOLDER")
-    SM_OUTPUT_DATA_DIR = BASE_DIR.parent / "model"
+    SM_MODEL_DIR = BASE_DIR.parent / "model"
     SM_CHECK_POINT_DIR = BASE_DIR.parent / "checkpoints"
+
+    # tensorflow pipline variables
+    # PIPE_LINE_SESSION = LocalPipelineSession()
 
 
 class TestConfig(BaseConfig):
     ENV = "testing"
     DEBUG = True
+    DOCKER = config("DOCKER", cast=bool)
     S3_ACCESS_KEY_ID = config("S3_ACCESS_KEY_ID")
     S3_SECRET_ACCESS_KEY = config("S3_SECRET_ACCESS_KEY")
     S3_SIG_BUCKET = config("S3_SIG_BUCKET")
@@ -49,13 +56,19 @@ class TestConfig(BaseConfig):
     DATA_SET_FOLDER = config("DATA_SET_FOLDER")
     PRE_PROCESSING_IN = BASE_DIR.parent / "data"
     PRE_PROCESSING_OUT = BASE_DIR.parent.parent / "output"
-    SM_OUTPUT_DATA_DIR = BASE_DIR.parent / "model"
+    SM_MODEL_DIR = BASE_DIR.parent / "model"
     SM_CHECK_POINT_DIR = BASE_DIR.parent / "checkpoints"
+
+    # tensorflow pipline variables
+    # PIPE_LINE_SESSION = LocalPipelineSession()
+
+
 
 
 class ProdConfig(BaseConfig):
     ENV = "production"
     DEBUG = True
+    DOCKER = config("DOCKER", cast=bool)
     S3_ACCESS_KEY_ID = config("S3_ACCESS_KEY_ID")
     S3_SECRET_ACCESS_KEY = config("S3_SECRET_ACCESS_KEY")
     S3_SIG_BUCKET = config("S3_SIG_BUCKET")
@@ -64,8 +77,11 @@ class ProdConfig(BaseConfig):
     DATA_SET_FOLDER = config("DATA_SET_FOLDER")
     PRE_PROCESSING_IN = BASE_DIR.parent / "data"
     PRE_PROCESSING_OUT = BASE_DIR.parent.parent / "output"
-    SM_OUTPUT_DATA_DIR = BASE_DIR.parent / "model"
+    SM_MODEL_DIR = BASE_DIR.parent / "model"
     SM_CHECK_POINT_DIR = BASE_DIR.parent / "checkpoints"
+
+    # tensorflow pipline variables
+    # PIPE_LINE_SESSION = PipelineSession()
 
 
 def get_settings():
@@ -81,5 +97,6 @@ def get_settings():
     else:
         raise Exception("Invalid  ENV environment variable value")
 
-
 settings = get_settings()
+if __name__ == "__main__":
+    settings = get_settings()

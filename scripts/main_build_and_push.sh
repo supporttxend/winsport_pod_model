@@ -5,7 +5,7 @@
 
 # The argument to this script is the image name. This will be used as the image on the local
 # machine and combined with the account and region to form the repository name for ECR.
-image="process"
+image="main"
 
 if [ "$image" == "" ]
 then
@@ -26,7 +26,7 @@ fi
 
 # Get the region defined in the current configuration (default to us-west-2 if none defined)
 region=$(aws configure get region)
-region=${region:-us-west-2}
+region=${region:-us-west-1}
 
 
 fullname="${account}.dkr.ecr.${region}.amazonaws.com/${image}:latest"
@@ -46,7 +46,7 @@ aws ecr get-login-password --region "${region}" | docker login --username AWS --
 # Build the docker image locally with the image name and then push it to ECR
 # with the full name.
 
-docker build -f Dockerfile.proc . -t ${image}
+docker build -f builds/Dockerfile.main . -t ${image}
 
 docker tag ${image} ${fullname}
 

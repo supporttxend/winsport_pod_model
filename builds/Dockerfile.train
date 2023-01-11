@@ -5,13 +5,16 @@ FROM 401823493276.dkr.ecr.us-west-1.amazonaws.com/main:latest
 # keeps Python from writing the .pyc files which are unnecessary in this case. We also update
 # PATH so that the train and serve programs are found when the container is invoked.
 
-ENV PYTHONUNBUFFERED=TRUE
-ENV PYTHONDONTWRITEBYTECODE=TRUE
-ENV PATH="/opt/ml/code:${PATH}"
+ENV PYTHONUNBUFFERED = TRUE
+ENV PYTHONDONTWRITEBYTECODE = TRUE
+ENV PATH = "/opt/ml/code:${PATH}"
+
+
 
 # Set up the code in the image
 COPY code /opt/ml/code
 WORKDIR /opt/ml/code
+
 
 RUN chmod 777 -R .
 
@@ -19,6 +22,4 @@ RUN chmod 777 -R .
 
 RUN pip --no-cache-dir install -r requirements.txt
 
-ENTRYPOINT [ "./run.sh" ]
-
-# CMD ["train"]
+ENTRYPOINT "./run.sh"

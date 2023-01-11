@@ -1,49 +1,42 @@
-from pathlib import Path
 import os
-from decouple import AutoConfig
+import time
+from pathlib import Path
+
 import boto3
 import sagemaker
-from sagemaker.processing import ProcessingInput, ProcessingOutput
-from sagemaker.workflow.steps import ProcessingStep
-from sagemaker.workflow.pipeline_context import PipelineSession
-
+from decouple import AutoConfig
+from code.config import settings
 from sagemaker.inputs import TrainingInput
-from sagemaker.workflow.steps import TrainingStep
+from sagemaker.processing import ProcessingInput, ProcessingOutput
 from sagemaker.workflow.pipeline import Pipeline
-from sagemaker.workflow.pipeline_context import LocalPipelineSession
+from sagemaker.workflow.pipeline_context import (LocalPipelineSession,
+                                                 PipelineSession)
+from sagemaker.workflow.steps import ProcessingStep, TrainingStep
 
-from processing_pipeline import tf_processor, pipe_line_session
-from train_pipeline import tf_estimator
-import time
+from pod_pipeline.processing_pipeline import pipe_line_session, tf_processor
+from pod_pipeline.train_pipeline import tf_estimator
 
 try:
     BASE_DIR = Path(__file__).resolve().parent
+    print("Try BASE", BASE_DIR)
 
 except Exception as e:
-
     BASE_DIR = Path(".").parent.absolute()
+    print("Except BASE", BASE_DIR)
 
-print(BASE_DIR)
+# config = AutoConfig(search_path=BASE_DIR / "code" / "settings.ini")
 
-config = AutoConfig(search_path=BASE_DIR / "code" / "settings.ini")
-
-S3_SIG_BUCKET = config("S3_SIG_BUCKET")
-S3_SIG_FOLDER = config("S3_SIG_FOLDER")
-RAW_DATA_FOLDER = config("RAW_DATA_FOLDER")
-DATA_SET_FOLDER = config("DATA_SET_FOLDER")
-
-
-print("ENVIORNMENT ----------->", config("ENVIORNMENT"))
-
-sagemaker_session = sagemaker.Session()
-
-BUCKET_NAME = sagemaker_session.default_bucket()
-
-role = sagemaker.get_execution_role()
-
-# pipe_line_session = LocalPipelineSession()
+S3_SIG_BUCKET = settings.S3_SIG_BUCKET
+S3_SIG_FOLDER = settings.S3_SIG_FOLDER
+RAW_DATA_FOLDER = settings.RAW_DATA_FOLDER
+DATA_SET_FOLDER = settings.DATA_SET_FOLDER
 
 
+print("ENVIORNMENT ----------->", settings.ENV)
+
+sagemaker_session=sagemaker.Session()
+
+BUCKET_NAME=sagemaker_session.default_bucket()
 
 inputs = [
     ProcessingInput(
@@ -52,15 +45,6 @@ inputs = [
         destination=f"/opt/ml/processing/input/data",
     )
 ]
-
-# outputs = [
-#         ProcessingOutput(
-#             output_name="pod-data",
-#             source=f"/opt/ml/processing/output",
-#             destination=f"s3://{S3_SIG_BUCKET}/pod-data",
-#             # s3_upload_mode="EndOfJob",
-#         )
-# ]
 
 output = f's3://{S3_SIG_BUCKET}/data/'
 
@@ -88,14 +72,14 @@ estimator = tf_estimator.fit(
     job_name="Training",
 )
 
-step_train = TrainingStep(
+step_train=TrainingStep(
     name="pod-train-model",
     step_args=estimator,
 )
 
 step_train.add_depends_on([step_process])
 
-pipeline = Pipeline(
+pipeline=Pipeline(
     name=f"pod-pipeline-dev-{int(time.time())}",
     steps=[step_process, step_train],
     sagemaker_session=pipe_line_session,
@@ -106,6 +90,6 @@ pipeline.create(
 )
 
 # // pipeline will execute locally
-execution = pipeline.start()
+execution=pipeline.start()
 steps = execution.list_steps()
 print(steps)

@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-./main_build_and_push.sh && ./proc_build_and_push.sh && ./train_build_and_push.sh
+./scripts/main_build_and_push.sh && ./scripts/proc_build_and_push.sh && ./scripts/train_build_and_push.sh

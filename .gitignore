@@ -128,3 +128,11 @@ dmypy.json
 # Pyre type checker
 .pyre/
 pod_model/tl_model_v1.weights.best.*
+*.png
+*.PNG
+*.JPG
+*.jpg
+*.jpeg
+*.pdf
+*.hdf*
+*.ini

@@ -2,7 +2,6 @@ From nvidia/cuda:11.6.2-base-ubuntu20.04
 
 # FROM tensorflow/tensorflow:2.5.0
 
-USER ubuntu
 
 ENV PATH="/root/miniconda3/bin:${PATH}"
 ARG PATH="/root/miniconda3/bin:${PATH}"

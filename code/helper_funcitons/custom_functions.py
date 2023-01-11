@@ -1,7 +1,14 @@
-from keras.preprocessing.image import ImageDataGenerator
-from keras.applications.vgg16 import preprocess_input
 import os
+import tarfile
+import glob
+import pickle
 
+PATHS = {
+    'hyperparameters': 'input/config/hyperparameters.json',
+    'input': 'input/config/inputdataconfig.json',
+    'data': 'input/data/',
+    'model': 'model/'
+}
 
 def image_generator(
     download_dir, train_generator, test_generator, class_subset, BATCH_SIZE
@@ -48,3 +55,22 @@ def image_generator(
     )
 
     return traingen, validgen, testgen
+
+
+def get_path(key):
+    return '/opt/ml/' + PATHS[key]
+
+
+def load_model(model_dir_path):
+    model_file = None
+    filelist = glob.glob(str(model_dir_path / 'pod-model-*.pkl'))
+    model_path = str(model_dir_path / "model.tar.gz")
+    model_pkl_path =  glob.glob(str(model_dir_path / 'pod-model-*.pkl'))
+    if not filelist:
+        with tarfile.open(model_path) as tar:
+            tar.extractall(path=".")
+
+    with open(model_pkl_path[0], "rb") as out:
+        model_file = pickle.load(out)
+
+    return model_file
