@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+tensorflow
+python-multipart
+livelossplot
+python-decouple
+sagemaker
+schema
+awscli
+cloudpathlib[s3,gs,azure]
+split-folders
+scipy
+ipython
+PyPDF2
+fpdf2
