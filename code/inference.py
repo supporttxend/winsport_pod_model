@@ -32,6 +32,8 @@ def input_handler(data, context):
         print("umer --------->", payload)
         encoded_image = base64.b64encode(payload).decode("utf-8")
         instance = [{"b64": encoded_image}]
+        print("instance -------------->", instance)
+        print("json values ------------------>", json.dumps({"instances": instance})[:10])
         return json.dumps({"instances": instance})
     else:
         _return_error(
