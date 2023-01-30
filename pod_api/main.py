@@ -1,11 +1,11 @@
 import uvicorn
 from fastapi import FastAPI
-from routes import predictions, watermarke #training
-from config import settings
-from uvicorn.config import LOGGING_CONFIG
 # from session import engine, Base
 from fastapi.middleware.cors import CORSMiddleware
+from uvicorn.config import LOGGING_CONFIG
 
+from config import settings
+from routes import predictions, watermarke # training
 
 app = FastAPI(title=settings.PROJECT_NAME)
 

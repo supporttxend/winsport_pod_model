@@ -1,8 +1,9 @@
-from models import PodModel
 import json
 
+from models import PodModel
 
-def get_pod_files_by_id(pod_id="3241bdad-5232-4ee5-9762-e4796746d55f"):
+
+def get_pod_files_by_id(pod_id):
     pod_obj = PodModel.objects.filter(uuid=pod_id).get()
     pod_data = json.loads(pod_obj.to_json())
     path_list = []
@@ -17,11 +18,17 @@ def get_pod_files_by_id(pod_id="3241bdad-5232-4ee5-9762-e4796746d55f"):
 
 def update_pod_watermark_url(pod_id, data):
 
+    print(data, "update ------------>", pod_id)
+
     pod_obj = PodModel.objects(uuid=pod_id).modify(
             **data, upsert=True
         )
 
-    if not pod_obj:
-        print("Error: pod record not found")
-    else:
-        print("Status: pod record updated")
+    # if not pod_obj:
+    #     print("Error: pod record not found")
+    #     data = {"isWaterMarked": True}
+    #     pod_obj = PodModel.objects(uuid=pod_id).modify(
+    #         **data, upsert=True
+    #     )
+    # else:
+    #     print("Status: pod record updated")
