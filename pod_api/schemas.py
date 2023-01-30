@@ -1,5 +1,7 @@
-from pydantic import BaseModel
 from typing import List, Union
+
+from pydantic import BaseModel
+
 
 class DataSchema(BaseModel):
     data: str = None

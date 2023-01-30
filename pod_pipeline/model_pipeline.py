@@ -52,7 +52,7 @@ elif settings.ENV == "production":
 
 model = TensorFlowModel(
     # image_uri="train:latest",
-    model_data=f"s3://sagemaker-us-west-1-401823493276/training-estimator-test/model.tar.gz",
+    model_data=f"s3://sagemaker-us-west-1-401823493276/pipelines-15t3n30u0dva-pod-training-step-JOkdNMc7ph/output/model.tar.gz",
     role=role,
     source_dir=source_dir,
     entry_point="inference.py",

@@ -1,5 +1,7 @@
 from mongoengine import *
+
 from config import settings
+
 try:
     connect(settings.MONGO_DB_URI)
 except:

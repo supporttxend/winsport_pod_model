@@ -1,20 +1,21 @@
-from fastapi import (
-    HTTPException,
-    Depends,
-    APIRouter,
-    status,
-    HTTPException,
-    Security,
-    BackgroundTasks,
-)
-from sqlalchemy.orm import Session
-from db.session import get_db
+from fastapi import (APIRouter, BackgroundTasks, Depends, HTTPException,
+                     Security, status)
 
+from pipeline import pipeline
+import sagemaker
 
 router = APIRouter()
 
+def start_pipline():
+    pipeline.create(
+        role_arn=sagemaker.get_execution_role(), description="local pipeline example"
+    )
 
-@router.get("/")
-def train():
+    print("running pipline from here")
+    execution = pipeline.start()
+    steps = execution.list_steps()
 
-    return {"status": status.HTTP_200_OK, "data": max_index, "feature": feature}
+@router.get("")
+def train(bg_task: BackgroundTasks):
+    bg_task.add_task(start_pipline)
+    return {"status": status.HTTP_200_OK, "data": "max_index", "feature": "feature"}

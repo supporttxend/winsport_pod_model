@@ -1,31 +1,41 @@
-from fastapi import (
-    HTTPException,
-    Depends,
-    APIRouter,
-    status,
-    HTTPException,
-    Security,
-    BackgroundTasks,
-    Query
-)
-from sqlalchemy.orm import Session
-from keras.applications.vgg16 import preprocess_input
-# from session import get_db
 import json
-from tensorflow.keras.preprocessing import image
-import numpy as np
-import requests
-from pydantic import BaseModel, Field
 from typing import Union
 
-
+import numpy as np
+import requests
+from fastapi import (APIRouter, BackgroundTasks, Depends, HTTPException, Query,
+                     Security, status)
+from keras.applications.vgg16 import preprocess_input
+from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
+from tensorflow.keras.preprocessing import image
+# from keras.preprocessing import image
+from routes.quries_s3 import get_s3_object
+import io
 
 router = APIRouter()
 
 
+
+def process_s3_image(s3_key):
+    # s3_key = "a837a8d7-f9bf-42b8-9af0-9897cfc59fc4/bol/a9310a92-c4bf-4f7f-a169-b4d8a245fc52.jpeg"
+    byte_image = get_s3_object(s3_key)
+    io_obj = io.BytesIO(byte_image.read())
+    raw_image = image.load_img(io_obj, target_size=(224, 224))
+    image_array = preprocess_input(
+        np.expand_dims(image.img_to_array(raw_image), axis=0)
+    )
+    input_data = {
+        "instances": image_array.tolist(),
+    }
+    data = json.dumps(input_data)
+
+    return data
+
+
 @router.get("/")
 def get_prediciton(
-    image_path :Union[str, None] = Query(default="/home/ubuntu/winsport_pod_model/data/2/original_2_1.png", alias="image-path"),
+    image_path :Union[str, None] = Query(default="a837a8d7-f9bf-42b8-9af0-9897cfc59fc4/bol/a9310a92-c4bf-4f7f-a169-b4d8a245fc52.jpeg", alias="image-path"),
 ):
     try:
         if not image_path:
@@ -34,14 +44,7 @@ def get_prediciton(
             )
 
 
-        raw_image = image.load_img(image_path, target_size=(224, 224))
-        image_array = preprocess_input(
-            np.expand_dims(image.img_to_array(raw_image), axis=0)
-        )
-        input_data = {
-            "instances": image_array.tolist(),
-        }
-        data = json.dumps(input_data)
+        data = process_s3_image(image_path)
         json_response = requests.post(
             "http://localhost:8080/invocations",
             data=data,

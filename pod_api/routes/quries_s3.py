@@ -1,7 +1,9 @@
-from config import settings
-import boto3
 import io
 from urllib.parse import urlparse
+
+import boto3
+
+from config import settings
 
 S3_BUCKET_NODE = settings.S3_BUCKET_NODE
 
@@ -22,6 +24,14 @@ def upload_image_to_s3(image, s3_key):
 
     return
 
+
+def upload_pdf_to_s3(pdf, s3_key):
+    with io.BytesIO() as bytes_stream:
+        pdf.write(bytes_stream)
+        bytes_stream.seek(0)
+        bucket = connect_bucket()
+        bucket.upload_fileobj(bytes_stream, s3_key)
+
 def del_s3_object(s3_key):
     bucket = connect_bucket()
     response = bucket.Object(s3_key).delete()
@@ -37,7 +47,6 @@ def get_s3_object(s3_key):
     bucket = connect_bucket()
     response = bucket.Object(s3_key).get()
     if response['ResponseMetadata']['HTTPStatusCode'] == 200:
-        print("object retrival faild")
         data = response['Body']
 
         return data
@@ -50,6 +59,6 @@ def get_s3_object_url(s3_key):
     client = boto3.client('s3')
     response = client.generate_presigned_url('get_object', Params={'Bucket': S3_BUCKET_NODE,'Key': s3_key})
     pasred = urlparse(response)
-    public_url = f"{pasred.scheme}/{pasred.hostname}{pasred.path}"
+    public_url = f"{pasred.scheme}://{pasred.hostname}{pasred.path}"
 
     return public_url

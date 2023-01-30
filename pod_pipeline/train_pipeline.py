@@ -39,7 +39,7 @@ role = sagemaker.get_execution_role()
 
 
 if settings.ENV == 'testing':
-    base_job_name = f"training-estimator-test"
+    base_job_name = f"training-estimator-test-{int(datetime.datetime.now().timestamp())}"
     if settings.DOCKER:
         image_uri = "train:latest"
         source_dir= str(BASE_DIR / 'code')
@@ -70,19 +70,35 @@ elif settings.ENV == "production":
 
 # model_path = f"s3://{BUCKET_NAME}/model"
 
+# tf_estimator = TensorFlow(
+#     # image_uri=image_uri,
+#     role=role,
+#     instance_count=1,
+#     instance_type="ml.c5.4xlarge",
+#     source_dir=source_dir,
+#     entry_point="train.py",
+#     model_dir=model_dir,
+#     framework_version="2.10",
+#     hyperparameters={"epoch": 1, "batch_size": 1, "learning_rate": 0.001},
+#     py_version="py39",
+#     checkpoint_s3_uri=checkpoint_s3_bucket,
+#     # sagemaker_session=sagemaker_session,
+#     script_mode=True,
+# )
+
 tf_estimator = TensorFlow(
-    image_uri=image_uri,
+    # image_uri=image_uri,
     role=role,
     instance_count=1,
-    instance_type=instance_type,
-    source_dir=source_dir,
+    instance_type="ml.c5.4xlarge",
+    source_dir=str(BASE_DIR / "code"),
     entry_point="train.py",
-    model_dir=model_dir,
+    # model_dir=f"s3://{BUCKET_NAME}/pod-training-step/model",
     framework_version="2.10",
     hyperparameters={"epoch": 1, "batch_size": 1, "learning_rate": 0.001},
     py_version="py39",
-    checkpoint_s3_uri=checkpoint_s3_bucket
     # sagemaker_session=sagemaker_session,
+    # script_mode=True,
 )
 
 
@@ -97,14 +113,14 @@ if __name__ == "__main__":
         job_name=base_job_name
         )
 
-    tf_model_info = tf_estimator.latest_training_job.describe()
-    model_s3_uri = tf_model_info['ModelArtifacts']['S3ModelArtifacts']
+#     tf_model_info = tf_estimator.latest_training_job.describe()
+#     model_s3_uri = tf_model_info['ModelArtifacts']['S3ModelArtifacts']
 
-    predictor = tf_estimator.deploy(
-    initial_instance_count=1,
-    instance_type='local',
-    endpoint_name="test-pod"
-    )
+#     predictor = tf_estimator.deploy(
+#     initial_instance_count=1,
+#     instance_type='local',
+#     endpoint_name="test-pod"
+#     )
 
 
     # tf_estimator.create_model(role=role, entry_point='serve.py', source_dir=source_dir)

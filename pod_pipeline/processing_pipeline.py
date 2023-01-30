@@ -54,13 +54,14 @@ tf_processor = TensorFlowProcessor(
     base_job_name = base_job_name,
     framework_version = "2.10",
     py_version = "py39",
+    # code_location=str(BASE_DIR / 'code'),
     # entrypoint = 'python preprocessing.py',
-    # sagemaker_session = pipe_line_session,
+    sagemaker_session = pipe_line_session,
 )
 
 
 if __name__ == "__main__":
-    #     #Run the processing job
+        #Run the processing job
     try:
         inputs = [
             ProcessingInput(

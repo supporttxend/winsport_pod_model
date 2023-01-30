@@ -1,9 +1,9 @@
-from decouple import config
-from pydantic import AnyHttpUrl
 import json
-from typing import List
-from decouple import AutoConfig
 from pathlib import Path
+from typing import List
+
+from decouple import AutoConfig, config
+from pydantic import AnyHttpUrl
 
 try:
     BASE_DIR = Path(__file__).resolve().parent
