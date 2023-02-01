@@ -1,14 +1,14 @@
+import datetime
 import os
+from code.config import settings
 from pathlib import Path
 
 import sagemaker
 from decouple import AutoConfig
-from code.config import settings
 from sagemaker.processing import ProcessingInput, ProcessingOutput, Processor
 from sagemaker.tensorflow import TensorFlowProcessor
 from sagemaker.workflow.pipeline_context import LocalPipelineSession, PipelineSession
 from sagemaker.workflow.steps import ProcessingStep
-import datetime
 
 try:
     BASE_DIR = Path(__file__).resolve().parent.parent
@@ -48,29 +48,31 @@ elif settings.ENV == "production":
 
 tf_processor = TensorFlowProcessor(
     # image_uri = image_uri,
-    role = role,
-    instance_type = instance_type,
-    instance_count = 1,
-    base_job_name = base_job_name,
-    framework_version = "2.10",
-    py_version = "py39",
+    role=role,
+    instance_type=instance_type,
+    instance_count=1,
+    base_job_name=base_job_name,
+    framework_version="2.10",
+    py_version="py39",
     # code_location=str(BASE_DIR / 'code'),
     # entrypoint = 'python preprocessing.py',
-    sagemaker_session = pipe_line_session,
+    sagemaker_session=pipe_line_session,
 )
 
 
 if __name__ == "__main__":
-        #Run the processing job
+    # Run the processing job
     try:
         inputs = [
             ProcessingInput(
-                input_name = f"{S3_SIG_FOLDER}",
-                source = f"s3://{S3_SIG_BUCKET}/{S3_SIG_FOLDER}/",
-                destination = f"/opt/ml/processing/input/data",
+                input_name=f"{S3_SIG_FOLDER}",
+                source=f"s3://{S3_SIG_BUCKET}/{S3_SIG_FOLDER}/",
+                destination=f"/opt/ml/processing/input/data",
             )
         ]
-        tf_processor.run(code = "preprocessing.py", source_dir = str(BASE_DIR / 'code'), inputs = inputs)
+        tf_processor.run(
+            code="preprocessing.py", source_dir=str(BASE_DIR / "code"), inputs=inputs
+        )
     except Exception as e:
         print(e)
 

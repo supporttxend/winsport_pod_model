@@ -1,27 +1,25 @@
-from fastapi import (
-    APIRouter,
-    UploadFile,
-    File,
-    Request,
-    HTTPException,
-    BackgroundTasks,
-    status,
-)
-from fastapi import APIRouter, Depends, HTTPException, status
-
-import uvicorn
-
 # from tensorflow.keras.preprocessing import image
 # import numpy as np
 # from keras.applications.vgg16 import VGG16, preprocess_input
 # from keras.models import load_model
 import shutil
-from PIL import Image
-import boto3
-from pod_model.quries import upload_file_to_bucket, s3_auth, upload_file_to_bucket
-from botocore.client import BaseClient
-from fastapi.responses import JSONResponse
 
+import boto3
+import uvicorn
+from botocore.client import BaseClient
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    File,
+    HTTPException,
+    Request,
+    UploadFile,
+    status,
+)
+from fastapi.responses import JSONResponse
+from PIL import Image
+from pod_model.quries import s3_auth, upload_file_to_bucket
 
 router = APIRouter()
 
