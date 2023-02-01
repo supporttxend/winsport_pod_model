@@ -1,6 +1,8 @@
-from pathlib import Path
 import os
+from pathlib import Path
+
 from decouple import AutoConfig
+
 # import os, sys
 # sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 
@@ -63,8 +65,6 @@ class TestConfig(BaseConfig):
     # PIPE_LINE_SESSION = LocalPipelineSession()
 
 
-
-
 class ProdConfig(BaseConfig):
     ENV = "production"
     DEBUG = True
@@ -96,6 +96,7 @@ def get_settings():
         return settings
     else:
         raise Exception("Invalid  ENV environment variable value")
+
 
 settings = get_settings()
 if __name__ == "__main__":

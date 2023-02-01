@@ -1,14 +1,15 @@
-import os
-import tarfile
 import glob
+import os
 import pickle
+import tarfile
 
 PATHS = {
-    'hyperparameters': 'input/config/hyperparameters.json',
-    'input': 'input/config/inputdataconfig.json',
-    'data': 'input/data/',
-    'model': 'model/'
+    "hyperparameters": "input/config/hyperparameters.json",
+    "input": "input/config/inputdataconfig.json",
+    "data": "input/data/",
+    "model": "model/",
 }
+
 
 def image_generator(
     download_dir, train_generator, test_generator, class_subset, BATCH_SIZE
@@ -58,14 +59,14 @@ def image_generator(
 
 
 def get_path(key):
-    return '/opt/ml/' + PATHS[key]
+    return "/opt/ml/" + PATHS[key]
 
 
 def load_model(model_dir_path):
     model_file = None
-    filelist = glob.glob(str(model_dir_path / 'pod-model-*.pkl'))
+    filelist = glob.glob(str(model_dir_path / "pod-model-*.pkl"))
     model_path = str(model_dir_path / "model.tar.gz")
-    model_pkl_path =  glob.glob(str(model_dir_path / 'pod-model-*.pkl'))
+    model_pkl_path = glob.glob(str(model_dir_path / "pod-model-*.pkl"))
     if not filelist:
         with tarfile.open(model_path) as tar:
             tar.extractall(path=".")

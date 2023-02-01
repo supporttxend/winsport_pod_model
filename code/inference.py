@@ -29,13 +29,13 @@ def input_handler(data, context):
 
     if context.request_content_type == "application/json":
         payload = data.read()
-        print("umer --------->", payload)
-        encoded_image = base64.b64encode(payload).decode("utf-8")
-        instance = [{"b64": encoded_image}]
-        return json.dumps({"instances": instance})
+        return payload
     else:
         _return_error(
-            415, 'Unsupported content type "{}"'.format(context.request_content_type or "Unknown")
+            415,
+            'Unsupported content type "{}"'.format(
+                context.request_content_type or "Unknown"
+            ),
         )
 
 

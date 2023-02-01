@@ -1,11 +1,10 @@
 from typing import Generator
 
+from config import settings
 from sqlalchemy import create_engine
 from sqlalchemy.engine.url import URL as sqlalchemy_engine_URL
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-
-from config import settings
 
 engine = create_engine(
     sqlalchemy_engine_URL.create(

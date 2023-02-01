@@ -1,30 +1,28 @@
-import tensorflow as tf
-from tensorflow.python.client import device_lib
+import argparse
+import codecs
+import datetime
+import json
 import os
-
-from keras.optimizers import Adam
-from keras.applications.vgg16 import VGG16, preprocess_input
-from keras.preprocessing.image import ImageDataGenerator
-from keras.callbacks import ModelCheckpoint, EarlyStopping
-
+import pickle
+import shutil
+import sys
+import time
+import traceback
 from pathlib import Path
+
 import numpy as np
+import splitfolders
+import tensorflow as tf
+from config import settings
+from helper_funcitons import custom_functions as cf
+from keras.applications.vgg16 import VGG16, preprocess_input
+from keras.callbacks import EarlyStopping, ModelCheckpoint
+from keras.optimizers import Adam
+from keras.preprocessing.image import ImageDataGenerator
 from livelossplot.inputs.keras import PlotLossesCallback
 from models import create_model
-from helper_funcitons import custom_functions as cf
-import splitfolders
-from config import settings
 from quries import downlaod_data_set
-import shutil
-import datetime
-import time
-import pickle
-import argparse
-import traceback
-import sys
-import json
-import codecs
-
+from tensorflow.python.client import device_lib
 
 try:
     BASE_DIR = Path(__file__).resolve().parent
@@ -58,6 +56,7 @@ print("Script is running")
 #         session = InteractiveSession(config=config)
 #     fix_gpu()
 
+
 def save_history(path, history):
 
     history_for_json = {}
@@ -75,12 +74,14 @@ def save_history(path, history):
     with codecs.open(path, "w", encoding="utf-8") as f:
         json.dump(history_for_json, f, separators=(",", ":"), sort_keys=True, indent=4)
 
+
 def save_model(model, output):
 
     # create a TensorFlow SavedModel for deployment to a SageMaker endpoint with TensorFlow Serving
-    tf.keras.models.save_model(model, output+"/tensorflow_model/1")
+    tf.keras.models.save_model(model, output + "/tensorflow_model/1")
     print("Model successfully saved at: {}".format(output))
     return
+
 
 def main(args):
 
@@ -89,7 +90,6 @@ def main(args):
         BATCH_SIZE = args.batch_size
         EPOCH = args.epoch
         LEARNING_RATE = args.learning_rate
-
 
         input_path = BASE_DIR.parent / "input/data"
         # class_subset = sorted(os.listdir(BASE_PATH / DATA_SET_FOLDER / "train"))
@@ -134,7 +134,9 @@ def main(args):
         #     monitor="accuracy",
         #     verbose=1,
         # )
-        tl_checkpoint_1 = ModelCheckpoint(args.output_data_dir + "/checkpoint-{epoch}.h5")
+        tl_checkpoint_1 = ModelCheckpoint(
+            args.output_data_dir + "/checkpoint-{epoch}.h5"
+        )
         print("checkpoint", tl_checkpoint_1)
 
         Model_NAME = f"signature-model-{int(time.time())}"
@@ -155,34 +157,56 @@ def main(args):
             print("For cehcking :", key)
 
         # with open(
-        #     os.path.join(model_dir, f"pod-model-{int(time.time())}.pkl"), "wb"
+        #     os.path.join(model_output, f"pod-model-{int(time.time())}.pkl"), "wb"
         # ) as out:
         #     pickle.dump(vgg_model, out)
         print("Saving the model.")
-        # save_history(model_dir + "/hvd_history.p", vgg_history)
-        save_model(vgg_model, args.model_output_dir)
+        # save_history(model_output + "/hvd_history.p", vgg_history)
+        save_model(vgg_model, args.model_output)
 
         print("Training complete.")
 
     except Exception as e:
 
         trc = traceback.format_exc()
-        with open(os.path.join(args.output_dir, 'failure'), 'w') as s:
-            s.write('Exception during training: ' + str(e) + '\n' + trc)
+        with open(os.path.join(args.output_dir, "failure"), "w") as s:
+            s.write("Exception during training: " + str(e) + "\n" + trc)
 
-        print('Exception during training: ' + str(e) + '\n' + trc, file=sys.stderr)
+        print("Exception during training: " + str(e) + "\n" + trc, file=sys.stderr)
 
         sys.exit(255)
+
+
 if __name__ == "__main__":
 
     argParser = argparse.ArgumentParser()
-    argParser.add_argument("-bs", "--batch_size", type=int, help="batch size", default=2)
+    argParser.add_argument(
+        "-bs", "--batch_size", type=int, help="batch size", default=2
+    )
     argParser.add_argument("-e", "--epoch", type=int, help="epoch size", default=3)
-    argParser.add_argument("-lr", "--learning_rate", type=float, help="learning rate", default=0.001)
-    argParser.add_argument("--tensorboard-dir", type=str, default=os.environ.get("SM_MODULE_DIR"))
-    argParser.add_argument("--model_output_dir", type=str, help="model dir", default=os.environ.get("SM_MODEL_DIR"))
-    argParser.add_argument("--output_data_dir", type=str, default=os.environ.get("SM_OUTPUT_DATA_DIR"))
-    argParser.add_argument("--output_dir", type=str, help="model dir", default=os.environ.get("SM_OUTPUT_DIR"))
+    argParser.add_argument(
+        "-lr", "--learning_rate", type=float, help="learning rate", default=0.001
+    )
+    argParser.add_argument(
+        "--tensorboard-dir", type=str, default=os.environ.get("SM_MODULE_DIR")
+    )
+    argParser.add_argument(
+        "--model_output",
+        type=str,
+        help="model dir",
+        default=os.environ.get("SM_MODEL_DIR"),
+    )
+    argParser.add_argument(
+        "--output_data_dir", type=str, default=os.environ.get("SM_OUTPUT_DATA_DIR")
+    )
+    argParser.add_argument(
+        "--output_dir",
+        type=str,
+        help="model dir",
+        default=os.environ.get("SM_OUTPUT_DIR"),
+    )
+    # adding for s3
+    argParser.add_argument("--model_dir", type=str)
 
     args = argParser.parse_args()
     print("ARGS ------------>", args)

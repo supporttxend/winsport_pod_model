@@ -1,25 +1,39 @@
 import io
-from io import BytesIO
+
 # from session import get_db
 import json
+import time
+from io import BytesIO
 from pathlib import Path
 from typing import List, Union
 from urllib.parse import urlparse
 
 import PyPDF2
-from fastapi import (APIRouter, BackgroundTasks, Depends, Header,
-                     HTTPException, Query, Request, Security, status)
+from config import settings
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    Header,
+    HTTPException,
+    Query,
+    Request,
+    Security,
+    status,
+)
 from fpdf import FPDF
 from PIL import Image, ImageDraw, ImageFont
 from pydantic import BaseModel, Field
-from sqlalchemy.orm import Session
-
-from config import settings
 from quries import get_pod_files_by_id, update_pod_watermark_url
-from routes.quries_s3 import (del_s3_object, get_s3_object, get_s3_object_url,
-                              upload_image_to_s3, upload_pdf_to_s3)
+from routes.quries_s3 import (
+    del_s3_object,
+    get_s3_object,
+    get_s3_object_url,
+    upload_image_to_s3,
+    upload_pdf_to_s3,
+)
 from routes.utils import exception_callback
-import time
+from sqlalchemy.orm import Session
 
 try:
     BASE_DIR = Path(__file__).resolve().parent
@@ -34,31 +48,30 @@ print("water marke", BASE_DIR / "settings.ini")
 S3_BUCKET_NODE = settings.S3_BUCKET_NODE
 
 
-
-
 router = APIRouter()
+
 
 def resolve_s3_path(url):
     path = urlparse(url)
     s3_key = path.path.lstrip("/")
     s3_uri = f"s3://{S3_BUCKET_NODE}/{s3_key}"
-    file_path  = Path(path.path)
+    file_path = Path(path.path)
     extention = file_path.suffix.lower()
     file_name = file_path.name
     return url, s3_key, s3_uri, extention, file_name
 
 
-
 def new_page(text):
-    pdf = FPDF(format='A4') #pdf format
-    pdf.add_page() #create new page
+    pdf = FPDF(format="A4")  # pdf format
+    pdf.add_page()  # create new page
     pdf.set_font("Helvetica", size=12)
     with pdf.local_context(text_mode="CLIP"):
 
         pdf.text(pdf.w - 100, pdf.h - 10, txt=text)
         for r in range(0, 250, 2):  # drawing concentric circles
-            pdf.circle(x=pdf.w-r/2, y=pdf.h-r/2, r=r)
+            pdf.circle(x=pdf.w - r / 2, y=pdf.h - r / 2, r=r)
     return pdf.output("watermark.pdf")
+
 
 def apply_watermark_pdf(s3_key, text):
     # text = "umer javed is a good boy"
@@ -72,7 +85,7 @@ def apply_watermark_pdf(s3_key, text):
     input_pdf = PyPDF2.PdfReader(io.BytesIO(byte_pdf.read()))
     output = PyPDF2.PdfWriter()
 
-    watermark_file = open("watermark.pdf",'rb')
+    watermark_file = open("watermark.pdf", "rb")
     watermark_pdf = PyPDF2.PdfReader(watermark_file)
 
     for i in range(input_pdf.pages.length_function()):
@@ -94,6 +107,7 @@ def apply_watermark_pdf(s3_key, text):
 
     return url
 
+
 def file_type(extention):
     file_types = {
         ".jpg": "image",
@@ -105,8 +119,8 @@ def file_type(extention):
         exception_callback(
             status.HTTP_400_BAD_REQUEST,
             "File Type Missmatched",
-            {"data": f"{extention}", "message": "File Type Missmatched"}
-            )
+            {"data": f"{extention}", "message": "File Type Missmatched"},
+        )
 
     else:
         if file_types[extention] == "image":
@@ -114,7 +128,6 @@ def file_type(extention):
 
         if file_types[extention] == "pdf":
             return "pdf"
-
 
 
 def apply_watermark_image(s3_key, text):
@@ -132,13 +145,16 @@ def apply_watermark_image(s3_key, text):
         y = height - textheight - margin
         black = (3, 8, 12, 0)
         draw.text((x, y), text, fill=black, font=font)
-        s3_new_key = f"{Path(s3_key).parent}/water_marked_{int(time.time())}_{text}.jpeg"
+        s3_new_key = (
+            f"{Path(s3_key).parent}/water_marked_{int(time.time())}_{text}.jpeg"
+        )
         upload_image_to_s3(im, s3_new_key)
         url = get_s3_object_url(s3_new_key)
         # im.save(BASE_DIR.parent.parent / f"data/watermark_{file_name}")
         del_s3_object(s3_key)
 
         return url
+
 
 def apply_watermark(pod_id):
     file_list = get_pod_files_by_id(pod_id)
@@ -159,21 +175,17 @@ def apply_watermark(pod_id):
         if "pod" in url:
             # data = {"podPath": url}
             new_file_urls["podPath"] = url
-            new_file_urls['isWaterMarked'] = True
+            new_file_urls["isWaterMarked"] = True
         if "bol" in url:
             # data = {"bolPath": url}
             new_file_urls["bolPath"] = url
-            new_file_urls['isWaterMarked'] = True
+            new_file_urls["isWaterMarked"] = True
         if "invoice" in url:
             # data = {"invoicePath": url}
             new_file_urls["invoicePath"] = url
-            new_file_urls['isWaterMarked'] = True
+            new_file_urls["isWaterMarked"] = True
 
     update_pod_watermark_url(pod_id, new_file_urls)
-
-
-
-
 
 
 @router.get("")

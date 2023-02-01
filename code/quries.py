@@ -1,18 +1,13 @@
-import boto3
-from fastapi import UploadFile
-from datetime import datetime
 import os
-from botocore.exceptions import ClientError
-
-
-from config import settings
-
+from datetime import datetime
+from pathlib import Path
 
 import boto3
 from botocore.client import BaseClient
+from botocore.exceptions import ClientError
 from cloudpathlib import CloudPath
-from pathlib import Path
-
+from config import settings
+from fastapi import UploadFile
 
 S3_SIG_FOLDER = settings.S3_SIG_FOLDER
 S3_SIG_BUCKET = settings.S3_SIG_BUCKET

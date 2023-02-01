@@ -1,10 +1,10 @@
-from fastapi import (APIRouter, BackgroundTasks, Depends, HTTPException,
-                     Security, status)
+import sagemaker
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Security, status
 
 from pipeline import pipeline
-import sagemaker
 
 router = APIRouter()
+
 
 def start_pipline():
     pipeline.create(
@@ -14,6 +14,7 @@ def start_pipline():
     print("running pipline from here")
     execution = pipeline.start()
     steps = execution.list_steps()
+
 
 @router.get("")
 def train(bg_task: BackgroundTasks):

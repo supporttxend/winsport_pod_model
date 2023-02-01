@@ -1,8 +1,9 @@
-from fastapi import FastAPI, Response, Request
-import uvicorn
-from joblib import dump, load
-from helper_funcitons.custom_functions import load_model, get_path
 from pathlib import Path
+
+import uvicorn
+from fastapi import FastAPI, Request, Response
+from helper_funcitons.custom_functions import get_path, load_model
+from joblib import dump, load
 
 try:
     BASE_DIR = Path(__file__).resolve().parent
@@ -16,25 +17,15 @@ except Exception as e:
 app = FastAPI()
 
 
-
-
-
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
 
+
 @app.post("/invocations")
 def predict():
 
-    return Response(
-        response="Yes this is model response",
-        status=200
-    )
-
-
-
-
-
+    return Response(response="Yes this is model response", status=200)
 
 
 if __name__ == "__main__":
