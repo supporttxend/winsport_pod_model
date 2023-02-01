@@ -1,11 +1,11 @@
 import uvicorn
+from config import settings
 from fastapi import FastAPI
+
 # from session import engine, Base
 from fastapi.middleware.cors import CORSMiddleware
+from routes import predictions, watermarke  # training
 from uvicorn.config import LOGGING_CONFIG
-
-from config import settings
-from routes import predictions, watermarke # training
 
 app = FastAPI(title=settings.PROJECT_NAME)
 
@@ -16,7 +16,6 @@ app.include_router(watermarke.router, prefix="/watermarke", tags=["watermarke"])
 # app.include_router(users.router, prefix="/users", tags=["users"])
 
 
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS],
@@ -24,10 +23,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-
-
 
 
 if __name__ == "__main__":

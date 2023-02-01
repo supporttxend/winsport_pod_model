@@ -8,11 +8,11 @@ def get_pod_files_by_id(pod_id):
     pod_data = json.loads(pod_obj.to_json())
     path_list = []
     if "bolPath" in pod_data:
-        path_list.append(pod_data['bolPath'])
+        path_list.append(pod_data["bolPath"])
     if "podPath" in pod_data:
-        path_list.append(pod_data['podPath'])
+        path_list.append(pod_data["podPath"])
     if "invoicePath" in pod_data:
-        path_list.append(pod_data['invoicePath'])
+        path_list.append(pod_data["invoicePath"])
     return path_list
 
 
@@ -20,9 +20,7 @@ def update_pod_watermark_url(pod_id, data):
 
     print(data, "update ------------>", pod_id)
 
-    pod_obj = PodModel.objects(uuid=pod_id).modify(
-            **data, upsert=True
-        )
+    pod_obj = PodModel.objects(uuid=pod_id).modify(**data, upsert=True)
 
     # if not pod_obj:
     #     print("Error: pod record not found")

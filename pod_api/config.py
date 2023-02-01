@@ -22,9 +22,9 @@ TEMP_ENV = config("ENVIORNMENT")
 print("ENVIORNMENT ----------->", config("ENVIORNMENT"))
 
 
-
 class BaseConfig:
     """Base config."""
+
     PROJECT_NAME = config("PROJECT_NAME") + " APIs"
 
 
@@ -34,7 +34,7 @@ class DevConfig(BaseConfig):
     API_PORT_DOCKER = config("API_PORT_DOCKER", cast=int)
     MONGO_DB_URI = config("MONGO_DB_URI", cast=str)
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = json.loads(config("BACKEND_CORS_ORIGINS"))
-    S3_BUCKET_NODE=config("S3_BUCKET_NODE")
+    S3_BUCKET_NODE = config("S3_BUCKET_NODE")
 
 
 class TestConfig(BaseConfig):
@@ -48,7 +48,7 @@ class ProdConfig(BaseConfig):
     API_PORT_DOCKER = config("API_PORT_DOCKER", cast=int)
     MONGO_DB_URI = config("MONGO_DB_URI", cast=str)
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = json.loads(config("BACKEND_CORS_ORIGINS"))
-    S3_BUCKET_NODE=config("S3_BUCKET_NODE")
+    S3_BUCKET_NODE = config("S3_BUCKET_NODE")
 
 
 def get_settings():
@@ -66,7 +66,6 @@ def get_settings():
 
 
 settings = get_settings()
-
 
 
 if __name__ == "__main__":

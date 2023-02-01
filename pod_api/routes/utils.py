@@ -1,5 +1,4 @@
 from fastapi import HTTPException
-
 from schemas import DetailsSchema
 
 
