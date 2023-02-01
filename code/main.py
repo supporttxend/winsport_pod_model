@@ -1,9 +1,11 @@
 from re import T
-from fastapi import FastAPI
+
 import uvicorn
-import api_pod
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+
+import api_pod
 
 app = FastAPI()
 app.mount("/data", StaticFiles(directory="data"), name="data")

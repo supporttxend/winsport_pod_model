@@ -1,15 +1,14 @@
-from config import settings
-from cloudpathlib import CloudPath
-from pathlib import Path
-import os
-import shutil
-import splitfolders
-import time
-import os
-import numpy as np
-import shutil
-import random
 import glob
+import os
+import random
+import shutil
+import time
+from pathlib import Path
+
+import numpy as np
+import splitfolders
+from cloudpathlib import CloudPath
+from config import settings
 
 try:
     BASE_DIR = Path(__file__).resolve().parent
@@ -63,7 +62,7 @@ PRE_PROCESSING_OUT = settings.PRE_PROCESSING_OUT
 
 def split_dateset_docker(ratio):
     try:
-        path = CloudPath(f's3://{S3_SIG_BUCKET}/data/')
+        path = CloudPath(f"s3://{S3_SIG_BUCKET}/data/")
         path.rmtree()
         path.mkdir(exist_ok=True)
         print("Successfully created directories")
