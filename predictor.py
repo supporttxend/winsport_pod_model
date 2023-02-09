@@ -1,7 +1,7 @@
 from pathlib import Path
+import json
 
 import numpy as np
-from helper_funcitons.custom_functions import get_path, load_model
 from keras.applications.vgg16 import VGG16, preprocess_input
 from keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.preprocessing import image
@@ -15,16 +15,8 @@ except Exception as e:
     BASE_DIR = Path(".").parent.absolute()
     print("Except BASE", BASE_DIR)
 
-model_dir_path = BASE_DIR.parent / "model"
-model = load_model(model_dir_path)
 
-import base64
-import io
-import json
-from io import BytesIO
 
-import requests
-from PIL import Image
 
 
 def image_file_to_tensor(

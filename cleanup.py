@@ -111,3 +111,5 @@ def main():
     delete_endpoints()
     delete_models()
     empty_and_delete_model_package(sm_client, "pod-model-packages")
+
+main()

@@ -1,12 +1,11 @@
 import datetime
 import os
 import time
-from code.config import settings
+from config import settings
 from pathlib import Path
 
 import boto3
 import sagemaker
-from decouple import AutoConfig
 from sagemaker import PipelineModel, image_uris
 from sagemaker.inputs import CreateModelInput, TrainingInput
 from sagemaker.model import Model
@@ -39,10 +38,13 @@ except Exception as e:
 
 local_pipeline_session = PipelineSession()  # LocalPipelineSession()
 
-S3_SIG_BUCKET = settings.S3_SIG_BUCKET
-S3_SIG_FOLDER = settings.S3_SIG_FOLDER
-RAW_DATA_FOLDER = settings.RAW_DATA_FOLDER
-DATA_SET_FOLDER = settings.DATA_SET_FOLDER
+S3_SIGNATURE_BUCKET = settings.S3_SIGNATURE_BUCKET
+S3_DATA_SET_FOLDER = settings.S3_DATA_SET_FOLDER
+S3_PREPARED_DATASET = settings.S3_PREPARED_DATASET
+PRE_PROCESSING_IN = settings.PRE_PROCESSING_IN
+PRE_PROCESSING_OUT = settings.PRE_PROCESSING_OUT
+INSTANCE_TYPE = settings.INSTANCE_TYPE
+APPROVAL_STATUS = settings.APPROVAL_STATUS
 
 BUCKET_NAME = local_pipeline_session.default_bucket()
 
@@ -56,8 +58,6 @@ try:
 
 except:
     version = 1
-instance_type = "ml.c5.4xlarge"
-approval_status = "Approved"
 
 
 # %% Data Spliting pipeline
@@ -66,42 +66,52 @@ approval_status = "Approved"
 def define_pipeline():
 
     # %% Create step for data set spliting
+
     inputs = [
         ProcessingInput(
-            input_name=f"{S3_SIG_FOLDER}",
-            source=f"s3://{S3_SIG_BUCKET}/{S3_SIG_FOLDER}/",
-            destination=f"/opt/ml/processing/input/data",
+            # input_name=f"{S3_SIG_FOLDER}",
+            source=f"s3://{S3_SIGNATURE_BUCKET}/{S3_DATA_SET_FOLDER}/",
+            destination=f"{PRE_PROCESSING_IN}",
+        )
+    ]
+    output = [
+        ProcessingOutput(
+            source=f"{PRE_PROCESSING_OUT}",
+            destination=f"s3://{S3_SIGNATURE_BUCKET}/{S3_PREPARED_DATASET}/",
+            # s3_upload_mode="EndOfJob"
         )
     ]
 
     tf_processor = TensorFlowProcessor(
         role=role,
-        instance_type=instance_type,
+        instance_type=INSTANCE_TYPE,
         instance_count=1,
         base_job_name=f"data-spliting-processor-testing-{datetime.datetime.now().strftime('%d_%B_%Y_%H_%M_%S_%p')}",
         framework_version="2.10",
         py_version="py39",
         sagemaker_session=local_pipeline_session,
+        env={"TRAIN": "0.7", "VALID":"0", "TEST":"0.3"}
     )
 
     processor = tf_processor.run(
-        code="preprocessing.py", source_dir=str(BASE_DIR / "code"), inputs=inputs
-    )
+            code="preprocessing.py",inputs=inputs, wait=True, logs= True, outputs=output, source_dir=str(BASE_DIR / "wrangal")
+        )
     step_process = ProcessingStep(
         name="pod-preprocessing-step",
         step_args=processor,
+        inputs=inputs
     )
 
     print("easily crossed the processing step")
 
     # %% Training Input and Training steps defination
-    train = TrainingInput(f"s3://{S3_SIG_BUCKET}/data/train")
-    test = TrainingInput(f"s3://{S3_SIG_BUCKET}/data/test")
+    train = TrainingInput(f"s3://{S3_SIGNATURE_BUCKET}/{S3_PREPARED_DATASET}/train")
+    test = TrainingInput(f"s3://{S3_SIGNATURE_BUCKET}/{S3_PREPARED_DATASET}/test")
 
     tf_estimator = TensorFlow(
         role=role,
         instance_count=1,
-        instance_type=instance_type,
+        instance_type=INSTANCE_TYPE,
         source_dir=str(BASE_DIR / "code"),
         entry_point="train.py",
         framework_version="2.10",
@@ -148,10 +158,10 @@ def define_pipeline():
     register_args = pipeline_model.register(
         content_types=["*"],
         response_types=["application/json"],
-        inference_instances=[instance_type],
-        transform_instances=[instance_type],
+        inference_instances=[INSTANCE_TYPE],
+        transform_instances=[INSTANCE_TYPE],
         model_package_group_name=model_package_group_name,
-        approval_status=approval_status,
+        approval_status=APPROVAL_STATUS,
     )
 
     print("easily crossed the register step")
@@ -165,7 +175,7 @@ def define_pipeline():
     # model_step.add_depends_on([step_train])
     pipeline = Pipeline(
         name=f"pod-pipeline-dev-{int(datetime.datetime.now().timestamp())}",
-        steps=[step_process, step_train, step_register_pipeline_model],
+        steps=[step_process, step_train, step_register_pipeline_model], #step_train, step_register_pipeline_model
         sagemaker_session=local_pipeline_session,
     )
 
@@ -201,7 +211,7 @@ def delete_pipeline(pipeline):
 
     return pipeline
 
-def mian_pipeline():
+def main_pipeline():
     pipeline = define_pipeline()
     execution, pipeline = run_pipeline(pipeline)
 
@@ -218,7 +228,8 @@ def mian_pipeline():
 
 
 if __name__ == "__main__":
-    mian_pipeline()
+    print("not load on import")
+    main_pipeline()
 
     # execution = pipeline.start()
 
