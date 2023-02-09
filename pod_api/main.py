@@ -4,7 +4,7 @@ from fastapi import FastAPI
 
 # from session import engine, Base
 from fastapi.middleware.cors import CORSMiddleware
-from routes import predictions, watermarke  # training
+from routes import predictions, watermarke, training
 from uvicorn.config import LOGGING_CONFIG
 
 app = FastAPI(title=settings.PROJECT_NAME)
@@ -12,7 +12,7 @@ app = FastAPI(title=settings.PROJECT_NAME)
 
 app.include_router(predictions.router, prefix="/predictions", tags=["predictions"])
 app.include_router(watermarke.router, prefix="/watermarke", tags=["watermarke"])
-# app.include_router(training.router, prefix="/training", tags=["auth"])
+app.include_router(training.router, prefix="/training", tags=["training"])
 # app.include_router(users.router, prefix="/users", tags=["users"])
 
 
