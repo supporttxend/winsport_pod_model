@@ -5,9 +5,11 @@ import os
 from botocore.exceptions import ClientError
 import tarfile
 import zipfile
+import subprocess
 
 logger = logging.getLogger(__name__)
 sm_client = boto3.client("sagemaker")
+s3_client  = boto3.client("s3")
 
 
 def get_approved_package(model_package_group_name):

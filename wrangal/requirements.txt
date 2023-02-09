@@ -1,0 +1,7 @@
+python-decouple
+sagemaker
+schema
+awscli
+cloudpathlib[s3,gs,azure]
+split-folders
+ipython

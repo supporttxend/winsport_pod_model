@@ -1,6 +1,7 @@
 import datetime
 import os
-from code.config import settings
+# from code.config_temp import settings
+from config import settings
 from pathlib import Path
 
 import sagemaker
@@ -8,7 +9,6 @@ from decouple import AutoConfig
 from sagemaker.tensorflow import TensorFlow, TensorFlowModel
 
 # import code.settings as settings
-from pod_pipeline.processing_pipeline import pipe_line_session
 
 try:
     BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,10 +22,10 @@ except Exception as e:
 
 # config = AutoConfig(search_path=BASE_DIR / "code" / "settings.ini")
 
-S3_SIG_BUCKET = settings.S3_SIG_BUCKET
-S3_SIG_FOLDER = settings.S3_SIG_FOLDER
-RAW_DATA_FOLDER = settings.RAW_DATA_FOLDER
-DATA_SET_FOLDER = settings.DATA_SET_FOLDER
+S3_SIGNATURE_BUCKET = settings.S3_SIGNATURE_BUCKET
+S3_PREPARED_DATASET = settings.S3_PREPARED_DATASET
+# RAW_DATA_FOLDER = settings.RAW_DATA_FOLDER
+# DATA_SET_FOLDER = settings.DATA_SET_FOLDER
 # PIPE_LINE_SESSION = settings.PIPE_LINE_SESSION
 
 
@@ -38,31 +38,30 @@ BUCKET_NAME = sagemaker_session.default_bucket()
 role = sagemaker.get_execution_role()
 
 
-if settings.ENV == "testing":
+if settings.ENV == "development":
     base_job_name = (
         f"training-estimator-test-{int(datetime.datetime.now().timestamp())}"
     )
-    if settings.DOCKER:
-        image_uri = "train:latest"
-        source_dir = str(BASE_DIR / "code")
+    # if settings.DOCKER:
+    #     source_dir = str(BASE_DIR / "code")
 
-        model_dir = f"s3://{BUCKET_NAME}/{base_job_name}/model"
-    else:
-        image_uri = False
-        source_dir = str(BASE_DIR / "code")
-        model_dir = False
+    #     model_dir = f"s3://{BUCKET_NAME}/{base_job_name}/model"
+    # else:
+    image_uri = False
+    source_dir = str(BASE_DIR / "code")
+    model_dir = False
 
-    instance_type = "local"
+    instance_type = "ml.m5.4xlarge"
     checkpoint_s3_bucket = False
 
 
 elif settings.ENV == "production":
-    if settings.DOCKER:
-        image_uri = "401823493276.dkr.ecr.us-west-1.amazonaws.com/train:latest"
-        source_dir = "code"
-    else:
-        image_uri = False
-        source_dir = str(BASE_DIR / "code")
+    # if settings.DOCKER:
+    #     image_uri = "401823493276.dkr.ecr.us-west-1.amazonaws.com/train:latest"
+    #     source_dir = "code"
+    # else:
+    image_uri = False
+    source_dir = str(BASE_DIR / "code")
 
     instance_type = "ml.m5.4xlarge"
     base_job_name = f"training-estimator-production"
@@ -106,8 +105,8 @@ tf_estimator = TensorFlow(
 if __name__ == "__main__":
     tf_estimator.fit(
         inputs={
-            "train": f"s3://{S3_SIG_BUCKET}/data/train",
-            "test": f"s3://{S3_SIG_BUCKET}/data/test",
+            "train": f"s3://{S3_SIGNATURE_BUCKET}/{S3_PREPARED_DATASET}/train",
+            "test": f"s3://{S3_SIGNATURE_BUCKET}/{S3_PREPARED_DATASET}/test",
         },
         wait=True,
         logs="All",

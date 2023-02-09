@@ -1,4 +1,4 @@
-from code.config import settings
+from code.config_temp import settings
 from pathlib import Path
 
 import sagemaker
