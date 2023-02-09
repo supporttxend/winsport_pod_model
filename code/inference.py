@@ -11,13 +11,6 @@
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 
-import base64
-import io
-import json
-
-import requests
-
-
 def input_handler(data, context):
     """Pre-process request input before it is sent to TensorFlow Serving REST API
     Args:

@@ -1,19 +1,15 @@
 import argparse
 import codecs
-import datetime
+
 import json
 import os
-import pickle
-import shutil
 import sys
 import time
 import traceback
 from pathlib import Path
 
 import numpy as np
-import splitfolders
 import tensorflow as tf
-from config import settings
 from helper_funcitons import custom_functions as cf
 from keras.applications.vgg16 import VGG16, preprocess_input
 from keras.callbacks import EarlyStopping, ModelCheckpoint
@@ -21,7 +17,6 @@ from keras.optimizers import Adam
 from keras.preprocessing.image import ImageDataGenerator
 from livelossplot.inputs.keras import PlotLossesCallback
 from models import create_model
-from quries import downlaod_data_set
 from tensorflow.python.client import device_lib
 
 try:
@@ -33,10 +28,6 @@ except Exception as e:
     BASE_DIR = Path(".").parent.absolute()
     print("Except BASE", BASE_DIR)
 
-RAW_DATA_FOLDER = settings.RAW_DATA_FOLDER
-DATA_SET_FOLDER = settings.DATA_SET_FOLDER
-SM_MODEL_DIR = settings.SM_MODEL_DIR
-SM_CHECK_POINT_DIR = settings.SM_CHECK_POINT_DIR
 
 print("Script is running")
 
@@ -92,7 +83,6 @@ def main(args):
         LEARNING_RATE = args.learning_rate
 
         input_path = BASE_DIR.parent / "input/data"
-        # class_subset = sorted(os.listdir(BASE_PATH / DATA_SET_FOLDER / "train"))
         class_subset = sorted(os.listdir(os.path.join(input_path, "train")))
 
         train_generator = ImageDataGenerator(
@@ -108,7 +98,6 @@ def main(args):
 
         test_generator = ImageDataGenerator(preprocessing_function=preprocess_input)
 
-        # download_dir = BASE_PATH / DATA_SET_FOLDER
         download_dir = input_path
         traingen, validgen, testgen = cf.image_generator(
             download_dir, train_generator, test_generator, class_subset, BATCH_SIZE
@@ -156,15 +145,11 @@ def main(args):
         for key in vgg_history.history:
             print("For cehcking :", key)
 
-        # with open(
-        #     os.path.join(model_output, f"pod-model-{int(time.time())}.pkl"), "wb"
-        # ) as out:
-        #     pickle.dump(vgg_model, out)
-        print("Saving the model.")
+        print("Saving the model......!")
         # save_history(model_output + "/hvd_history.p", vgg_history)
         save_model(vgg_model, args.model_output)
 
-        print("Training complete.")
+        print("Training complete.......!")
 
     except Exception as e:
 
@@ -211,5 +196,4 @@ if __name__ == "__main__":
     args = argParser.parse_args()
     print("ARGS ------------>", args)
 
-    # print("args.name=", args.name)
     main(args)
